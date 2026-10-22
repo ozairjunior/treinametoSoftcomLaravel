@@ -1,0 +1,16 @@
+CREATE DATABASE IF NOT EXISTS `softcoms_softcomshop_tabelas_padrao`;
+
+CREATE USER IF NOT EXISTS 'admin'@'%' IDENTIFIED BY 'ar7711';
+GRANT ALL PRIVILEGES ON *.* TO 'admin'@'%' WITH GRANT OPTION;
+
+CREATE USER IF NOT EXISTS 'adminsoftcomshop'@'%' IDENTIFIED BY 'ar7711';
+GRANT ALL PRIVILEGES ON *.* TO 'adminsoftcomshop'@'%' WITH GRANT OPTION;
+
+CREATE USER IF NOT EXISTS 'softcoms'@'%' IDENTIFIED BY 'ar7711';
+GRANT ALL PRIVILEGES ON *.* TO 'softcoms'@'%' WITH GRANT OPTION;
+
+ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'ar7711';
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'ar7711';
+FLUSH PRIVILEGES;
+
+FLUSH PRIVILEGES;

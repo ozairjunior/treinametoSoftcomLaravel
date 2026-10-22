@@ -1,0 +1,81 @@
+services:
+  softcom:
+    build: ./docker/php
+    image: softcom_app
+    container_name: softcom_php
+    restart: unless-stopped
+    volumes:
+      - .:/var/www
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - softcom_network
+  nginx:
+    image: nginx:alpine
+    container_name: softcom_nginx
+    restart: unless-stopped
+    ports:
+      - "${DOCKER_NGINX_PORT:-80}:80"
+    volumes:
+      - .:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - softcom
+    networks:
+      - softcom_network
+  redis:
+    image: redis:alpine
+    container_name: softcom_redis
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - softcom_network
+  node:
+    image: node:20-bullseye
+    container_name: softcom_node
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    tty: true
+  softcom_mysql:
+    image: mysql:8.0
+    container_name: softcom_mysql
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: ar7711
+    ports:
+      - "${DOCKER_MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysqldata:/var/lib/mysql
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-par7711" ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - softcom_network
+  softcom_phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: softcom_phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: softcom_mysql
+    ports:
+      - "${DOCKER_PMA_PORT:-8080}:80"
+    depends_on:
+      - softcom_mysql
+    networks:
+      - softcom_network
+networks:
+  softcom_network:
+    external: true
+    name: softcom_global_network
+volumes:
+  mysqldata:
