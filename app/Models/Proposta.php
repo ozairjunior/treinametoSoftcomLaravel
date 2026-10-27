@@ -20,11 +20,14 @@ class Proposta extends Model
         'rodada_atual',
         'status',
         'condicoes_observacoes',
+        'assinatura_cliente',
+        'assinado_em',
     ];
 
     protected $casts = [
         'valor_oferecido' => 'decimal:2',
         'valida_ate' => 'datetime',
+        'assinado_em' => 'datetime',
     ];
 
     public function imovel()

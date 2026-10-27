@@ -60,6 +60,8 @@ class ContratoController extends Controller
         $dados['corretor_id'] = $proposta->corretor_id;
         $dados['status'] = 'aguardando_assinaturas';
         $dados['hash_documento'] = hash('sha256', $dados['termos_contrato']);
+        $dados['assinatura_cliente'] = $proposta->assinatura_cliente;
+        $dados['assinado_cliente_em'] = $proposta->assinado_em;
 
         $contrato = Contrato::create($dados);
 
@@ -101,17 +103,22 @@ class ContratoController extends Controller
     {
         $request->validate([
             'parte' => ['required', Rule::in(['cliente', 'proprietario'])],
+            'assinatura_base64' => ['required', 'string'],
+        ], [
+            'assinatura_base64.required' => 'Desenhe a assinatura com o mouse no quadro antes de confirmar.',
         ]);
 
         if ($contrato->status === 'cancelado') {
             return back()->withErrors(['status' => 'Contrato cancelado não pode receber assinaturas.']);
         }
 
-        if ($request->parte === 'cliente' && !$contrato->assinado_cliente_em) {
+        if ($request->parte === 'cliente') {
+            $contrato->assinatura_cliente = $request->assinatura_base64;
             $contrato->assinado_cliente_em = now();
         }
 
-        if ($request->parte === 'proprietario' && !$contrato->assinado_proprietario_em) {
+        if ($request->parte === 'proprietario') {
+            $contrato->assinatura_proprietario = $request->assinatura_base64;
             $contrato->assinado_proprietario_em = now();
         }
 
@@ -143,6 +150,12 @@ class ContratoController extends Controller
             "Assinatura digital ({$request->parte}) registrada no contrato {$contrato->codigo_contrato} (Hash: {$contrato->hash_documento})"
         );
 
-        return back()->with('status', "Assinatura eletrônica ({$request->parte}) registrada! A partir de agora o contrato é imutável.");
+        return back()->with('status', "Assinatura eletrônica ({$request->parte}) desenhada e registrada! A partir de agora o contrato é imutável.");
+    }
+
+    public function pdf(Contrato $contrato)
+    {
+        $contrato->load(['imovel.proprietarios', 'cliente', 'corretor', 'proposta']);
+        return view('contratos.pdf', compact('contrato'));
     }
 }

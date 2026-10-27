@@ -8,7 +8,11 @@ Route::get('/', function () {
 });
 
 Auth::routes();
-
+/*esse bloco define as rotas de autenticação. usando o middleware de autenticação e verificação de status e papel. 
+o middleware é usado para agrupar rotas que requerem autenticação. então tudo que esta fora do middleware tem 
+acesso sem autenticação e status do usuario se esta ativo ou não, 
+ele verifica tambem se o usuario tem o perfil de acesso a uma rota. com isso da para dividir o acesso por perfis.
+o primeiro middleware verifica apenas se o usuario esta autenticado, ja o segundo verifica se o usuario tem perfil de admin*/
 Route::middleware(['auth', 'status.role'])->group(function () {
     Route::get('/home', 'HomeController@index')->name('home');
 
@@ -28,6 +32,7 @@ Route::middleware(['auth', 'status.role'])->group(function () {
     Route::resource('propostas', 'PropostaController')->only(['index', 'create', 'store', 'show']);
     Route::post('propostas/{proposta}/contraproposta', 'PropostaController@contraproposta')->name('propostas.contraproposta');
     Route::patch('propostas/{proposta}/decidir', 'PropostaController@decidir')->name('propostas.decidir');
+    Route::post('propostas/{proposta}/assinar', 'PropostaController@assinar')->name('propostas.assinar');
 
     Route::get('contratos', 'ContratoController@index')->name('contratos.index');
     Route::get('propostas/{proposta}/gerar-contrato', 'ContratoController@createFromProposta')->name('contratos.create.proposta');
@@ -35,6 +40,7 @@ Route::middleware(['auth', 'status.role'])->group(function () {
     Route::get('contratos/{contrato}', 'ContratoController@show')->name('contratos.show');
     Route::patch('contratos/{contrato}/termos', 'ContratoController@updateTermos')->name('contratos.update.termos');
     Route::post('contratos/{contrato}/assinar', 'ContratoController@assinar')->name('contratos.assinar');
+    Route::get('contratos/{contrato}/pdf', 'ContratoController@pdf')->name('contratos.pdf');
 
     Route::middleware(['status.role:admin'])->group(function () {
         Route::resource('colaboradores', 'ColaboradorController')->except(['show', 'destroy']);

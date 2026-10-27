@@ -25,6 +25,10 @@
         <div class="alert alert-success">{{ session('status') }}</div>
     @endif
 
+    @if ($errors->any())
+        <div class="alert alert-danger">{{ $errors->first() }}</div>
+    @endif
+
     <div class="row">
         <div class="col-md-5">
             <div class="card card-outline card-primary">
@@ -51,6 +55,41 @@
                             </button>
                         </form>
                     @endif
+                </div>
+            </div>
+
+            <div class="card card-outline card-dark">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-signature mr-1"></i>Assinatura Digital na Proposta</h3>
+                </div>
+                <div class="card-body text-center">
+                    @if ($proposta->assinatura_cliente)
+                        <p class="text-success mb-2">
+                            <i class="fas fa-check-circle"></i> Assinada em {{ $proposta->assinado_em ? $proposta->assinado_em->format('d/m/Y H:i') : '' }}
+                        </p>
+                        <div class="border rounded bg-white p-2 mb-2">
+                            <img src="{{ $proposta->assinatura_cliente }}" alt="Assinatura Digital" style="max-width: 100%; height: 120px; object-fit: contain;">
+                        </div>
+                        <small class="text-muted d-block">Deseja substituir a assinatura? Desenhe novamente abaixo:</small>
+                    @else
+                        <p class="text-muted small mb-2">Assine no quadro abaixo segurando o botão esquerdo do mouse:</p>
+                    @endif
+
+                    <form method="POST" action="{{ route('propostas.assinar', $proposta) }}" id="form-assinatura">
+                        @csrf
+                        <input type="hidden" name="assinatura_cliente" id="input-assinatura">
+                        <div class="border rounded bg-light mb-2" style="display: inline-block;">
+                            <canvas id="canvas-assinatura" width="360" height="150" style="cursor: crosshair; touch-action: none; background: #fff;"></canvas>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="limparAssinatura()">
+                                <i class="fas fa-eraser mr-1"></i> Limpar Quadro
+                            </button>
+                            <button type="submit" class="btn btn-sm btn-primary" onclick="return prepararEnvioAssinatura()">
+                                <i class="fas fa-pen-nib mr-1"></i> Salvar Assinatura Digital
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -114,4 +153,71 @@
             </div>
         </div>
     </div>
+@stop
+
+@section('js')
+<script>
+    var canvas = document.getElementById('canvas-assinatura');
+    var ctx = canvas.getContext('2d');
+    var desenhando = false;
+    var temTraco = false;
+
+    ctx.strokeStyle = '#0b2e59';
+    ctx.lineWidth = 2.2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    function posicaoMouse(e) {
+        var rect = canvas.getBoundingClientRect();
+        var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        var clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return {
+            x: clientX - rect.left,
+            y: clientY - rect.top
+        };
+    }
+
+    function iniciarDesenho(e) {
+        e.preventDefault();
+        desenhando = true;
+        var pos = posicaoMouse(e);
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+    }
+
+    function desenhar(e) {
+        if (!desenhando) return;
+        e.preventDefault();
+        temTraco = true;
+        var pos = posicaoMouse(e);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+    }
+
+    function pararDesenho() {
+        desenhando = false;
+    }
+
+    canvas.addEventListener('mousedown', iniciarDesenho);
+    canvas.addEventListener('mousemove', desenhar);
+    window.addEventListener('mouseup', pararDesenho);
+
+    canvas.addEventListener('touchstart', iniciarDesenho, { passive: false });
+    canvas.addEventListener('touchmove', desenhar, { passive: false });
+    window.addEventListener('touchend', pararDesenho);
+
+    function limparAssinatura() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        temTraco = false;
+    }
+
+    function prepararEnvioAssinatura() {
+        if (!temTraco) {
+            alert('Por favor, desenhe sua assinatura com o mouse no quadro branco antes de salvar!');
+            return false;
+        }
+        document.getElementById('input-assinatura').value = canvas.toDataURL('image/png');
+        return true;
+    }
+</script>
 @stop

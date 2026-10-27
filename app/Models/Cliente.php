@@ -35,8 +35,8 @@ class Cliente extends Model
     ];
 
     protected $casts = [
-        'documento' => 'encrypted',
-        'rg' => 'encrypted',
+        //'documento' => 'encrypted',
+        //'rg' => 'encrypted',
         'is_proprietario' => 'boolean',
         'is_interessado' => 'boolean',
         'is_locatario_comprador' => 'boolean',

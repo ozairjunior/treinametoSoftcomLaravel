@@ -11,6 +11,13 @@ class CheckUserStatusAndRole
 {
     public function handle(Request $request, Closure $next, ...$roles)
     {
+        /*esse Bloco verifica se esta altenticado, não estando ele passa por ele e atribui o autenticador em user.
+        em seguida ele faz a verificação se o ususario esta ativo. essa verificação ela é registrada como log.
+        caso o usuario não esteja ativo, ele é redirecionado para a página de login. forçando o logout 
+        e ja regenerando o token.
+        o ultimo if faz uma verificação se a rota tem alguma restrição de perfil. tipo se ele é admin, corretor... 
+        sobre esses pergis de usuarios foi usado o php artisan make:model User 
+        e o autenticador foi usado o php artisan make:auth*/
         if (!Auth::check()) {
             return redirect()->route('login');
         }

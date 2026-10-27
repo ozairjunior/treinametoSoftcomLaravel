@@ -151,4 +151,30 @@ class PropostaController extends Controller
 
         return back()->with('status', 'Proposta marcada como RECUSADA.');
     }
+
+    public function assinar(Request $request, Proposta $proposta)
+    {
+        $request->validate([
+            'assinatura_cliente' => ['required', 'string'],
+        ], [
+            'assinatura_cliente.required' => 'Desenhe a assinatura no quadro antes de confirmar.',
+        ]);
+
+        $proposta->update([
+            'assinatura_cliente' => $request->assinatura_cliente,
+            'assinado_em' => now(),
+        ]);
+
+        if ($proposta->contrato && !$proposta->contrato->assinatura_cliente) {
+            $proposta->contrato->update([
+                'assinatura_cliente' => $request->assinatura_cliente,
+                'assinado_cliente_em' => $proposta->contrato->assinado_cliente_em ?? now(),
+            ]);
+        }
+
+        AuditLog::registrar('proposta_assinada', "Assinatura digital manuscrita coletada na proposta #{$proposta->id}");
+
+        return back()->with('status', 'Assinatura digital registrada com sucesso na proposta!');
+    }
+
 }

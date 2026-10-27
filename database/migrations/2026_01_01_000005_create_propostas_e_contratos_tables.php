@@ -20,6 +20,8 @@ return new class extends Migration
             $table->unsignedSmallInteger('rodada_atual')->default(1);
             $table->enum('status', ['em_analise', 'aceita', 'recusada', 'expirada'])->default('em_analise');
             $table->text('condicoes_observacoes')->nullable();
+            $table->longText('assinatura_cliente')->nullable();
+            $table->timestamp('assinado_em')->nullable();
             $table->timestamps();
         });
 
@@ -53,7 +55,9 @@ return new class extends Migration
             $table->longText('termos_contrato');
             $table->string('plataforma_assinatura', 40)->default('ICP-Brasil / Hash Interno');
             $table->string('hash_documento', 64)->nullable();
+            $table->longText('assinatura_cliente')->nullable();
             $table->timestamp('assinado_cliente_em')->nullable();
+            $table->longText('assinatura_proprietario')->nullable();
             $table->timestamp('assinado_proprietario_em')->nullable();
             $table->enum('status', ['rascunho', 'aguardando_assinaturas', 'parcialmente_assinado', 'vigente_formalizado', 'cancelado'])->default('aguardando_assinaturas');
             $table->timestamps();

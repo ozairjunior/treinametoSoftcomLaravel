@@ -27,7 +27,9 @@ class Contrato extends Model
         'termos_contrato',
         'plataforma_assinatura',
         'hash_documento',
+        'assinatura_cliente',
         'assinado_cliente_em',
+        'assinatura_proprietario',
         'assinado_proprietario_em',
         'status',
     ];

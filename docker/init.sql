@@ -1,4 +1,4 @@
-CREATE DATABASE IF NOT EXISTS `softcoms_softcomshop_tabelas_padrao`;
+CREATE DATABASE IF NOT EXISTS `softcoms_softcomshop_imobiliaria_softcom`;
 
 CREATE USER IF NOT EXISTS 'admin'@'%' IDENTIFIED BY 'ar7711';
 GRANT ALL PRIVILEGES ON *.* TO 'admin'@'%' WITH GRANT OPTION;

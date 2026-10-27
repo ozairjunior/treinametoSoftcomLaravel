@@ -5,7 +5,12 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <h1><i class="fas fa-file-contract mr-2"></i>Contrato <code>{{ $contrato->codigo_contrato }}</code></h1>
-        <a href="{{ route('contratos.index') }}" class="btn btn-default">Voltar</a>
+        <div>
+            <a href="{{ route('contratos.pdf', $contrato) }}" target="_blank" class="btn btn-danger mr-1">
+                <i class="fas fa-file-pdf mr-1"></i> Visualizar PDF / Imprimir
+            </a>
+            <a href="{{ route('contratos.index') }}" class="btn btn-default">Voltar</a>
+        </div>
     </div>
 @stop
 
@@ -26,31 +31,68 @@
                     <p><strong>Plataforma:</strong> {{ $contrato->plataforma_assinatura }}</p>
                     <p><strong>Hash SHA-256:</strong><br><code class="small">{{ $contrato->hash_documento }}</code></p>
                     <hr>
-                    <p>
+
+                    <div class="mb-3">
                         <strong>1. Assinatura do Cliente ({{ $contrato->cliente->nome_razao_social }}):</strong><br>
                         @if ($contrato->assinado_cliente_em)
-                            <span class="badge badge-success"><i class="fas fa-check"></i> Assinado em {{ $contrato->assinado_cliente_em->format('d/m/Y H:i') }}</span>
+                            <span class="badge badge-success mb-1"><i class="fas fa-check"></i> Assinado em {{ $contrato->assinado_cliente_em->format('d/m/Y H:i') }}</span>
+                            @if ($contrato->assinatura_cliente)
+                                <div class="border rounded bg-white p-1 text-center">
+                                    <img src="{{ $contrato->assinatura_cliente }}" alt="Assinatura Cliente" style="max-width: 100%; height: 70px; object-fit: contain;">
+                                </div>
+                            @endif
                         @else
-                            <form method="POST" action="{{ route('contratos.assinar', $contrato) }}" class="mt-1">
-                                @csrf
-                                <input type="hidden" name="parte" value="cliente">
-                                <button type="submit" class="btn btn-sm btn-outline-primary"><i class="fas fa-pen-nib mr-1"></i> Coletar Assinatura do Cliente</button>
-                            </form>
+                            <span class="badge badge-warning">Aguardando Assinatura</span>
                         @endif
-                    </p>
+                    </div>
 
-                    <p>
+                    <div class="mb-3">
                         <strong>2. Assinatura do Proprietário:</strong><br>
                         @if ($contrato->assinado_proprietario_em)
-                            <span class="badge badge-success"><i class="fas fa-check"></i> Assinado em {{ $contrato->assinado_proprietario_em->format('d/m/Y H:i') }}</span>
+                            <span class="badge badge-success mb-1"><i class="fas fa-check"></i> Assinado em {{ $contrato->assinado_proprietario_em->format('d/m/Y H:i') }}</span>
+                            @if ($contrato->assinatura_proprietario)
+                                <div class="border rounded bg-white p-1 text-center">
+                                    <img src="{{ $contrato->assinatura_proprietario }}" alt="Assinatura Proprietário" style="max-width: 100%; height: 70px; object-fit: contain;">
+                                </div>
+                            @endif
                         @else
-                            <form method="POST" action="{{ route('contratos.assinar', $contrato) }}" class="mt-1">
-                                @csrf
-                                <input type="hidden" name="parte" value="proprietario">
-                                <button type="submit" class="btn btn-sm btn-outline-primary"><i class="fas fa-pen-nib mr-1"></i> Coletar Assinatura do Proprietário</button>
-                            </form>
+                            <span class="badge badge-warning">Aguardando Assinatura</span>
                         @endif
-                    </p>
+                    </div>
+
+                    @if (!$contrato->assinado_cliente_em || !$contrato->assinado_proprietario_em)
+                        <hr>
+                        <h6 class="font-weight-bold text-primary"><i class="fas fa-signature mr-1"></i>Desenhar Assinatura com o Mouse:</h6>
+                        <form method="POST" action="{{ route('contratos.assinar', $contrato) }}" id="form-assinar-contrato">
+                            @csrf
+                            <input type="hidden" name="assinatura_base64" id="input-assinatura-contrato">
+
+                            <div class="form-group mb-2">
+                                <label class="small mb-1">Quem está assinando agora?</label>
+                                <select name="parte" class="form-control form-control-sm">
+                                    @if (!$contrato->assinado_cliente_em)
+                                        <option value="cliente">1. Cliente ({{ $contrato->cliente->nome_razao_social }})</option>
+                                    @endif
+                                    @if (!$contrato->assinado_proprietario_em)
+                                        <option value="proprietario">2. Proprietário do Imóvel</option>
+                                    @endif
+                                </select>
+                            </div>
+
+                            <div class="border rounded bg-light text-center mb-2">
+                                <canvas id="canvas-contrato" width="320" height="140" style="cursor: crosshair; touch-action: none; background: #fff; max-width: 100%;"></canvas>
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="limparCanvasContrato()">
+                                    <i class="fas fa-eraser mr-1"></i> Limpar
+                                </button>
+                                <button type="submit" class="btn btn-sm btn-primary" onclick="return enviarAssinaturaContrato()">
+                                    <i class="fas fa-pen-nib mr-1"></i> Coletar Assinatura
+                                </button>
+                            </div>
+                        </form>
+                    @endif
                 </div>
             </div>
         </div>
@@ -98,4 +140,70 @@
             </div>
         </div>
     </div>
+@stop
+
+@section('js')
+<script>
+    var canvasContrato = document.getElementById('canvas-contrato');
+    if (canvasContrato) {
+        var ctxContrato = canvasContrato.getContext('2d');
+        var desenhandoContrato = false;
+        var temTracoContrato = false;
+
+        ctxContrato.strokeStyle = '#0b2e59';
+        ctxContrato.lineWidth = 2.2;
+        ctxContrato.lineCap = 'round';
+        ctxContrato.lineJoin = 'round';
+
+        function posContrato(e) {
+            var rect = canvasContrato.getBoundingClientRect();
+            var cx = e.touches ? e.touches[0].clientX : e.clientX;
+            var cy = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: cx - rect.left, y: cy - rect.top };
+        }
+
+        function iniciarContrato(e) {
+            e.preventDefault();
+            desenhandoContrato = true;
+            var p = posContrato(e);
+            ctxContrato.beginPath();
+            ctxContrato.moveTo(p.x, p.y);
+        }
+
+        function riscarContrato(e) {
+            if (!desenhandoContrato) return;
+            e.preventDefault();
+            temTracoContrato = true;
+            var p = posContrato(e);
+            ctxContrato.lineTo(p.x, p.y);
+            ctxContrato.stroke();
+        }
+
+        function pararContrato() {
+            desenhandoContrato = false;
+        }
+
+        canvasContrato.addEventListener('mousedown', iniciarContrato);
+        canvasContrato.addEventListener('mousemove', riscarContrato);
+        window.addEventListener('mouseup', pararContrato);
+
+        canvasContrato.addEventListener('touchstart', iniciarContrato, { passive: false });
+        canvasContrato.addEventListener('touchmove', riscarContrato, { passive: false });
+        window.addEventListener('touchend', pararContrato);
+
+        window.limparCanvasContrato = function () {
+            ctxContrato.clearRect(0, 0, canvasContrato.width, canvasContrato.height);
+            temTracoContrato = false;
+        };
+
+        window.enviarAssinaturaContrato = function () {
+            if (!temTracoContrato) {
+                alert('Desenhe a assinatura com o mouse no quadro branco antes de clicar em Coletar Assinatura!');
+                return false;
+            }
+            document.getElementById('input-assinatura-contrato').value = canvasContrato.toDataURL('image/png');
+            return true;
+        };
+    }
+</script>
 @stop
