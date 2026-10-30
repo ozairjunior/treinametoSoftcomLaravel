@@ -8,11 +8,6 @@ Route::get('/', function () {
 });
 
 Auth::routes();
-/*esse bloco define as rotas de autenticação. usando o middleware de autenticação e verificação de status e papel. 
-o middleware é usado para agrupar rotas que requerem autenticação. então tudo que esta fora do middleware tem 
-acesso sem autenticação e status do usuario se esta ativo ou não, 
-ele verifica tambem se o usuario tem o perfil de acesso a uma rota. com isso da para dividir o acesso por perfis.
-o primeiro middleware verifica apenas se o usuario esta autenticado, ja o segundo verifica se o usuario tem perfil de admin*/
 Route::middleware(['auth', 'status.role'])->group(function () {
     Route::get('/home', 'HomeController@index')->name('home');
 
