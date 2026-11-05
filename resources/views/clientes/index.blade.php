@@ -22,17 +22,17 @@
     <div class="card card-outline card-primary">
         <div class="card-header">
             <form method="GET" action="{{ route('clientes.index') }}" class="row">
-                <div class="col-md-5">
+                <div class="col-md-4 mb-2">
                     <input type="text" name="busca" value="{{ request('busca') }}" class="form-control" placeholder="Buscar por nome, razão social, e-mail ou CPF/CNPJ exato...">
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-2 mb-2">
                     <select name="tipo_pessoa" class="form-control">
                         <option value="">PF e PJ</option>
                         <option value="PF" {{ request('tipo_pessoa') === 'PF' ? 'selected' : '' }}>Pessoa Física (PF)</option>
                         <option value="PJ" {{ request('tipo_pessoa') === 'PJ' ? 'selected' : '' }}>Pessoa Jurídica (PJ)</option>
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2 mb-2">
                     <select name="papel" class="form-control">
                         <option value="">Todos os Papéis</option>
                         <option value="proprietario" {{ request('papel') === 'proprietario' ? 'selected' : '' }}>Proprietário</option>
@@ -40,7 +40,14 @@
                         <option value="locatario_comprador" {{ request('papel') === 'locatario_comprador' ? 'selected' : '' }}>Locatário / Comprador</option>
                     </select>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-2 mb-2">
+                    <select name="cadastro_status" class="form-control">
+                        <option value="">Todos os Cadastros</option>
+                        <option value="pre_cadastro" {{ request('cadastro_status') === 'pre_cadastro' ? 'selected' : '' }}>Pré-cadastro (Catálogo)</option>
+                        <option value="completo" {{ request('cadastro_status') === 'completo' ? 'selected' : '' }}>Cadastro Completo</option>
+                    </select>
+                </div>
+                <div class="col-md-2 mb-2">
                     <button type="submit" class="btn btn-secondary btn-block"><i class="fas fa-search"></i> Filtrar</button>
                 </div>
             </form>
@@ -62,7 +69,14 @@
                     @forelse ($clientes as $c)
                         <tr>
                             <td>
-                                <a href="{{ route('clientes.show', $c) }}"><strong>{{ $c->nome_razao_social }}</strong></a><br>
+                                <a href="{{ route('clientes.show', $c) }}"><strong>{{ $c->nome_razao_social }}</strong></a>
+                                @if ($c->cadastro_status === 'pre_cadastro')
+                                    <span class="badge badge-warning">Pré-cadastro</span>
+                                @endif
+                                @if ($c->origem === 'catalogo')
+                                    <span class="badge badge-light border">Catálogo</span>
+                                @endif
+                                <br>
                                 <small class="text-muted">{{ $c->telefone ?? '-' }} | {{ $c->email ?? '-' }}</small>
                             </td>
                             <td>

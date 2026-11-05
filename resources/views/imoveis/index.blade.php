@@ -5,9 +5,14 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <h1><i class="fas fa-building mr-2"></i>Carteira de Imóveis</h1>
-        <a href="{{ route('imoveis.create') }}" class="btn btn-primary">
-            <i class="fas fa-plus mr-1"></i> Novo Imóvel
-        </a>
+        <div>
+            <a href="{{ route('catalogo.index') }}" target="_blank" class="btn btn-outline-primary mr-1">
+                <i class="fas fa-globe mr-1"></i> Ver Catálogo Público
+            </a>
+            <a href="{{ route('imoveis.create') }}" class="btn btn-primary">
+                <i class="fas fa-plus mr-1"></i> Novo Imóvel
+            </a>
+        </div>
     </div>
 @stop
 
@@ -107,6 +112,14 @@
                                 <span class="badge badge-{{ $cores[$imovel->status] ?? 'secondary' }} text-uppercase">
                                     {{ $imovel->status }}
                                 </span>
+                                <br>
+                                @if ($imovel->publicar_catalogo && $imovel->status === 'disponivel')
+                                    <small class="badge badge-outline-success text-success"><i class="fas fa-globe"></i> Visível no Catálogo</small>
+                                @elseif ($imovel->publicar_catalogo)
+                                    <small class="text-muted"><i class="fas fa-eye-slash"></i> Marcado p/ Catálogo (Oculto pelo status)</small>
+                                @else
+                                    <small class="text-muted"><i class="fas fa-lock"></i> Apenas Interno</small>
+                                @endif
                             </td>
                             <td class="text-right">
                                 <a href="{{ route('imoveis.show', $imovel) }}" class="btn btn-sm btn-primary" title="Fotos, Plantas e Detalhes">

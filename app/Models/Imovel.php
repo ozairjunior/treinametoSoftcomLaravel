@@ -17,6 +17,7 @@ class Imovel extends Model
         'tipo',
         'finalidade',
         'status',
+        'publicar_catalogo',
         'reservado_ate',
         'cep',
         'logradouro',
@@ -46,6 +47,7 @@ class Imovel extends Model
     ];
 
     protected $casts = [
+        'publicar_catalogo' => 'boolean',
         'aceita_pets' => 'boolean',
         'imovel_habitado' => 'boolean',
         'reservado_ate' => 'datetime',
@@ -55,6 +57,12 @@ class Imovel extends Model
         'valor_iptu' => 'decimal:2',
         'taxa_administracao' => 'decimal:2',
     ];
+
+    public function scopeDisponivelNoCatalogo($query)
+    {
+        return $query->where('publicar_catalogo', true)
+            ->where('status', 'disponivel');
+    }
 
     public function corretor()
     {
@@ -87,5 +95,10 @@ class Imovel extends Model
             ->where('categoria', 'foto')
             ->orderByDesc('is_capa')
             ->orderBy('ordem');
+    }
+
+    public function interesses()
+    {
+        return $this->hasMany(InteresseImovel::class, 'imovel_id')->latest();
     }
 }

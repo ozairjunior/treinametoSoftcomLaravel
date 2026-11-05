@@ -3,7 +3,17 @@
 @section('title', 'Dashboard Imobiliário')
 
 @section('content_header')
-    <h1><i class="fas fa-chart-line mr-2"></i>Painel de Gestão Imobiliária</h1>
+    <div class="d-flex justify-content-between align-items-center">
+        <h1><i class="fas fa-chart-line mr-2"></i>Painel de Gestão Imobiliária</h1>
+        <div>
+            <a href="{{ route('interesses.index') }}" class="btn btn-warning mr-1">
+                <i class="fas fa-bullhorn mr-1"></i> Interesses Recebidos ({{ \App\Models\InteresseImovel::where('status', 'novo')->count() }} novos)
+            </a>
+            <a href="{{ route('catalogo.index') }}" target="_blank" class="btn btn-outline-primary">
+                <i class="fas fa-globe mr-1"></i> Abrir Catálogo Público
+            </a>
+        </div>
+    </div>
 @stop
 
 @section('content')

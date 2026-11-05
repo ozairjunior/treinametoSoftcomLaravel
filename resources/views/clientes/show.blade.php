@@ -29,6 +29,21 @@
                     <p><strong>Telefone:</strong> {{ $cliente->telefone ?? '-' }}</p>
                     <p><strong>E-mail:</strong> {{ $cliente->email ?? '-' }}</p>
                     <p><strong>Corretor:</strong> {{ $cliente->corretor->name ?? '-' }}</p>
+                    <p>
+                        <strong>Status do Cadastro:</strong>
+                        @if ($cliente->cadastro_status === 'pre_cadastro')
+                            <span class="badge badge-warning">Pré-cadastro</span>
+                        @else
+                            <span class="badge badge-success">Completo</span>
+                        @endif
+                        <small class="text-muted ml-1">(Origem: {{ $cliente->origem ?? 'interno' }})</small>
+                    </p>
+                    @if ($cliente->consentimento_lgpd_at)
+                        <p>
+                            <strong>Consentimento LGPD:</strong>
+                            <span class="badge badge-info">{{ $cliente->consentimento_lgpd_at->format('d/m/Y H:i') }}</span>
+                        </p>
+                    @endif
                     <hr>
                     <p><strong>Papéis Ativos:</strong><br>
                         @if ($cliente->is_proprietario) <span class="badge badge-primary">Proprietário</span> @endif

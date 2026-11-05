@@ -35,6 +35,17 @@
                         <button type="submit" class="btn btn-primary">Atualizar</button>
                     </form>
                     <hr>
+                    <p>
+                        <strong>Divulgação no Catálogo Público:</strong>
+                        @if ($imovel->publicar_catalogo && $imovel->status === 'disponivel')
+                            <span class="badge badge-success">Visível no Catálogo</span>
+                            <a href="{{ route('catalogo.show', $imovel) }}" target="_blank" class="ml-1 small"><i class="fas fa-external-link-alt"></i> Ver página pública</a>
+                        @elseif ($imovel->publicar_catalogo)
+                            <span class="badge badge-warning">Marcado para divulgar (oculto pois status é {{ strtoupper($imovel->status) }})</span>
+                        @else
+                            <span class="badge badge-secondary">Não publicado</span>
+                        @endif
+                    </p>
                     <p><strong>Endereço:</strong> {{ $imovel->logradouro }}, {{ $imovel->numero }} {{ $imovel->complemento }} — {{ $imovel->bairro }}, {{ $imovel->cidade }}/{{ $imovel->uf }} ({{ $imovel->cep }})</p>
                     <p><strong>Características:</strong> {{ $imovel->quartos }} quartos ({{ $imovel->suites }} suítes), {{ $imovel->banheiros }} banheiros, {{ $imovel->vagas_garagem }} vagas, {{ $imovel->area_util }} m² útil.</p>
                     <p><strong>Venda:</strong> R$ {{ number_format($imovel->valor_venda ?? 0, 2, ',', '.') }} | <strong>Aluguel:</strong> R$ {{ number_format($imovel->valor_aluguel ?? 0, 2, ',', '.') }}</p>

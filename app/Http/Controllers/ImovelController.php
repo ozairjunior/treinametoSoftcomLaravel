@@ -61,6 +61,7 @@ class ImovelController extends Controller
         $imovel = new Imovel([
             'codigo_referencia' => $codigoSugerido,
             'status' => 'rascunho',
+            'publicar_catalogo' => true,
             'tipo' => 'apartamento',
             'finalidade' => 'venda',
             'mobiliado' => 'nao',
@@ -249,6 +250,7 @@ class ImovelController extends Controller
             'proprietarios.required' => 'É obrigatório vincular pelo menos um cliente Proprietário ao imóvel.',
         ]);
 
+        $dados['publicar_catalogo'] = $request->boolean('publicar_catalogo');
         $dados['aceita_pets'] = $request->boolean('aceita_pets');
         $dados['imovel_habitado'] = $request->boolean('imovel_habitado');
         $dados['valor_condominio'] = $dados['valor_condominio'] ?? 0;

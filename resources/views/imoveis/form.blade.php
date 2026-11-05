@@ -186,6 +186,12 @@
                             <label class="custom-control-label" for="imovel_habitado">Imóvel Habitado</label>
                         </div>
                     </div>
+                    <div class="form-group col-md-3 pt-4">
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input" id="publicar_catalogo" name="publicar_catalogo" value="1" {{ old('publicar_catalogo', $imovel->publicar_catalogo) ? 'checked' : '' }}>
+                            <label class="custom-control-label text-primary font-weight-bold" for="publicar_catalogo">Publicar no Catálogo Público</label>
+                        </div>
+                    </div>
                 </div>
 
                 <h5 class="text-primary border-bottom pb-2 mt-3"><i class="fas fa-dollar-sign mr-1"></i>4. Valores e Links Multimídia</h5>

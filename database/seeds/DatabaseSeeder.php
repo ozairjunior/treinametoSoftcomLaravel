@@ -5,6 +5,7 @@ use App\Models\Cliente;
 use App\Models\ClienteInteracao;
 use App\Models\Contrato;
 use App\Models\Imovel;
+use App\Models\InteresseImovel;
 use App\Models\Proposta;
 use App\Models\PropostaRodada;
 use App\Models\Visita;
@@ -217,6 +218,7 @@ class DatabaseSeeder extends Seeder
             'tipo' => 'apartamento',
             'finalidade' => 'venda',
             'status' => 'disponivel',
+            'publicar_catalogo' => true,
             'cep' => '58045-010',
             'logradouro' => 'Av. Cabo Branco',
             'numero' => '1850',
@@ -252,6 +254,7 @@ class DatabaseSeeder extends Seeder
             'tipo' => 'apartamento',
             'finalidade' => 'ambos',
             'status' => 'disponivel',
+            'publicar_catalogo' => true,
             'cep' => '58046-310',
             'logradouro' => 'Rua João Cyrillo da Silva',
             'numero' => '420',
@@ -286,6 +289,7 @@ class DatabaseSeeder extends Seeder
             'tipo' => 'casa',
             'finalidade' => 'venda',
             'status' => 'reservado',
+            'publicar_catalogo' => true,
             'reservado_ate' => now()->addWeekdays(5),
             'cep' => '58037-050',
             'logradouro' => 'Av. Presidente Afonso Pena',
@@ -371,6 +375,43 @@ class DatabaseSeeder extends Seeder
             'taxa_administracao' => 6.00,
         ]);
         $imovelTerreno->proprietarios()->sync([$propRoberto->id]);
+
+        $clienteCatalogo = Cliente::create([
+            'corretor_id' => $corretorCarlos->id,
+            'tipo_pessoa' => 'PF',
+            'nome_razao_social' => 'Camila Mendonça Araújo',
+            'email' => 'camila.araujo@email.com',
+            'telefone' => '(83) 99123-4567',
+            'documento' => '852.963.741-55',
+            'documento_hash' => Cliente::gerarHashDocumento('852.963.741-55'),
+            'is_proprietario' => false,
+            'is_interessado' => true,
+            'is_locatario_comprador' => false,
+            'documentacao_validada' => false,
+            'origem' => 'catalogo',
+            'cadastro_status' => 'pre_cadastro',
+            'consentimento_lgpd_at' => now()->subHours(4),
+        ]);
+
+        InteresseImovel::create([
+            'imovel_id' => $imovelCaboBranco->id,
+            'cliente_id' => $clienteCatalogo->id,
+            'corretor_id' => $corretorCarlos->id,
+            'tipo' => 'proposta',
+            'status' => 'novo',
+            'valor_proposto' => 2380000.00,
+            'mensagem' => 'Olá! Vi a Cobertura Duplex no catálogo público e tenho interesse em agendar uma visita neste sábado. Posso avaliar proposta à vista.',
+        ]);
+
+        InteresseImovel::create([
+            'imovel_id' => $imovelAltiplano->id,
+            'cliente_id' => $leadGustavo->id,
+            'corretor_id' => $corretorCarlos->id,
+            'tipo' => 'contato',
+            'status' => 'em_atendimento',
+            'valor_proposto' => null,
+            'mensagem' => 'Gostaria de saber o valor do condomínio incluso água/gás e disponibilidade para visita.',
+        ]);
 
         Visita::create([
             'imovel_id' => $imovelAltiplano->id,

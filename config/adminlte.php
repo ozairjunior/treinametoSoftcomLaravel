@@ -300,9 +300,15 @@ return [
 
         'menu' => [
         [
-            'text' => 'Dashboard',
+            'text' => 'Painel Inicial',
             'route' => 'home',
             'icon' => 'fas fa-fw fa-tachometer-alt',
+        ],
+        [
+            'text' => 'Catálogo Público',
+            'route' => 'catalogo.index',
+            'icon' => 'fas fa-fw fa-globe',
+            'target' => '_blank',
         ],
         ['header' => 'ADMINISTRAÇÃO & ACESSO'],
         [
@@ -316,6 +322,11 @@ return [
             'icon' => 'fas fa-fw fa-shield-alt',
         ],
         ['header' => 'COMERCIAL & CRM'],
+        [
+            'text' => 'Interesses Recebidos',
+            'route' => 'interesses.index',
+            'icon' => 'fas fa-fw fa-bullhorn',
+        ],
         [
             'text' => 'Clientes (CRM)',
             'route' => 'clientes.index',

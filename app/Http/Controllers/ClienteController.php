@@ -13,20 +13,6 @@ class ClienteController extends Controller
 {
     public function index(Request $request)
     {
-        /*O ClienteController faz a parte do CRUD de clientes a função index é responsável por listar os clientes. 
-        filtrando por tipo de pessoa, qual o papel do cliente, se é proprietario ou locatario... email e documento.
-        a função create fica responsavel para preparar o formulario ja com valores padrão para o tipo e papel 
-        deixando tambem corretores ativos amostra.
-        a função do store faz uma valicação aplica regras para caso o  cliente seja propietario para ser informado a 
-        documentacao e caso tenha comprovante de renda, com esses dados é criado o cliente e faz um registro de log.
-        o show carrega os dados do cliente com eager loading, com isso faz com que o Eloquent tenha mesmo queries em execução.
-        O edit é igual ao create, só que já com os dados preenchidos.
-        o update é responsável por atualizar os dados do cliente, utiliza mesmo fluxo do store, com diferenças no comando de update
-        o storeInteracao faz o registro de uma nova interação de um corretor com o cliente.
-        o anonimizar apaga dados pessoais do cliente pro conta da LGPD, para ficar um 
-        pouco ratreavel é registrado no log o antigo nome do cliente
-        ja o validarDados ele é usado para fazer a validação dos dados do cliente e não ficar repetitivo essas validações, 
-        tipo se ao cadastrar um cliente e o documento ja tiver no banco de dados ele faz essa validação*/
         $query = Cliente::with('corretor')->whereNull('anonimizado_em');
 
         if ($request->filled('tipo_pessoa')) {
@@ -41,6 +27,10 @@ class ClienteController extends Controller
             } elseif ($request->papel === 'locatario_comprador') {
                 $query->where('is_locatario_comprador', true);
             }
+        }
+
+        if ($request->filled('cadastro_status')) {
+            $query->where('cadastro_status', $request->cadastro_status);
         }
 
         if ($request->filled('busca')) {
@@ -79,6 +69,9 @@ class ClienteController extends Controller
             $dados['comprovante_renda_path'] = $request->file('comprovante_renda')->store('clientes/comprovantes', 'public');
         }
 
+        $dados['origem'] = 'interno';
+        $dados['cadastro_status'] = 'completo';
+
         $cliente = Cliente::create($dados);
 
         ClienteInteracao::create([
@@ -96,7 +89,7 @@ class ClienteController extends Controller
 
     public function show(Cliente $cliente)
     {
-        $cliente->load(['corretor', 'interacoes.autor']);
+        $cliente->load(['corretor', 'interacoes.autor', 'interesses.imovel']);
         return view('clientes.show', compact('cliente'));
     }
 
@@ -119,6 +112,8 @@ class ClienteController extends Controller
         if ($request->hasFile('comprovante_renda')) {
             $dados['comprovante_renda_path'] = $request->file('comprovante_renda')->store('clientes/comprovantes', 'public');
         }
+
+        $dados['cadastro_status'] = 'completo';
 
         $cliente->update($dados);
 

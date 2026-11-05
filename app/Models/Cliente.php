@@ -26,6 +26,9 @@ class Cliente extends Model
         'is_interessado',
         'is_locatario_comprador',
         'documentacao_validada',
+        'origem',
+        'cadastro_status',
+        'consentimento_lgpd_at',
         'pref_finalidade',
         'pref_tipo_imovel',
         'pref_bairro',
@@ -35,8 +38,6 @@ class Cliente extends Model
     ];
 
     protected $casts = [
-        //'documento' => 'encrypted',
-        //'rg' => 'encrypted',
         'is_proprietario' => 'boolean',
         'is_interessado' => 'boolean',
         'is_locatario_comprador' => 'boolean',
@@ -44,6 +45,7 @@ class Cliente extends Model
         'renda_comprovada' => 'decimal:2',
         'pref_preco_min' => 'decimal:2',
         'pref_preco_max' => 'decimal:2',
+        'consentimento_lgpd_at' => 'datetime',
         'anonimizado_em' => 'datetime',
     ];
 
@@ -61,6 +63,11 @@ class Cliente extends Model
     public function interacoes()
     {
         return $this->hasMany(ClienteInteracao::class)->latest();
+    }
+
+    public function interesses()
+    {
+        return $this->hasMany(InteresseImovel::class, 'cliente_id')->latest();
     }
 
     public function podeSerProprietario(): bool
